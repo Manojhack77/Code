@@ -301,3 +301,37 @@ void AreaSelectorWidget::keyPressEvent(QKeyEvent *event)
 }
     selector->showFullScreen();
 }
+
+
+
+
+
+
+
+QStringList RecordReplay::getFFmpegArguments(const QString &outputPath)
+{
+    QStringList arguments;
+
+    #ifdef Q_OS_WIN
+        arguments << "-framerate" << "30";
+
+        // Pass custom area width, height, and offsets to FFmpeg if custom mode is enabled
+        if (m_useAreaSelection && m_selectedRect.isValid() && m_selectedRect.width() > 0 && m_selectedRect.height() > 0) {
+            arguments << "-video_size" << QString("%1x%2").arg(m_selectedRect.width()).arg(m_selectedRect.height())
+                      << "-offset_x" << QString::number(m_selectedRect.x())
+                      << "-offset_y" << QString::number(m_selectedRect.y());
+        }
+
+        arguments << "-f" << "gdigrab"
+                << "-draw_mouse" << "1"
+                  << "-i" << "desktop"
+                  << "-c:v" << "libx264"
+                  << "-preset" << "veryfast"
+                  << "-crf" << "18"
+                  << "-pix_fmt" << "yuv420p"
+                  << "-y"
+                  << outputPath;
+    #endif
+
+        return arguments;
+}  header//#include <areaselectorwidget.h>
